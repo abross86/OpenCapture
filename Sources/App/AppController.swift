@@ -379,9 +379,9 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuItemValidation
     }
     @objc func openUserManual(_ sender: Any?) {
         if let u = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "manual") { NSWorkspace.shared.open(u) }
-        else { NSWorkspace.shared.open(URL(string: "https://github.com/alexbross/OpenCapture")!) }
+        else { NSWorkspace.shared.open(URL(string: "https://github.com/abross86/OpenCapture")!) }
     }
-    @objc func openProjectPage(_ sender: Any?) { NSWorkspace.shared.open(URL(string: "https://github.com/alexbross/OpenCapture")!) }
+    @objc func openProjectPage(_ sender: Any?) { NSWorkspace.shared.open(URL(string: "https://github.com/abross86/OpenCapture")!) }
     @objc func revealCaptureFolder(_ sender: Any?) { NSWorkspace.shared.open(Prefs.shared.captureDestinationURL) }
 
     // MARK: Menu validation
