@@ -28,8 +28,9 @@ enum ImageCapture {
 
     /// Saves the current frame. With `url` nil the destination follows the preferences (ask / auto-name).
     @discardableResult
-    static func save(to url: URL? = nil) -> URL? {
+    static func save(to url: URL? = nil, format explicitFormat: ImageFileFormat? = nil) -> URL? {
         let p = Prefs.shared
+        let format = explicitFormat ?? p.imageCaptureFormat
         guard let cg = currentImage(size: p.imageCaptureSize) else {
             ErrorLog.shared.log("Image", "No video frame available to save", code: 4001); return nil
         }
@@ -37,16 +38,17 @@ enum ImageCapture {
         if target == nil {
             if p.askWhereToSave {
                 let panel = NSSavePanel()
-                panel.allowedContentTypes = [[UTType.jpeg, .png, .tiff][p.imageCaptureFormat.rawValue]]
+                panel.allowedContentTypes = [[UTType.jpeg, .png, .tiff][format.rawValue]]
                 panel.nameFieldStringValue = TokenFormatter.expand(p.fileNameFormat)
                 panel.directoryURL = p.captureDestinationURL
                 guard panel.runModal() == .OK, let u = panel.url else { return nil }
                 target = u
             } else {
-                target = TokenFormatter.uniqueFileURL(in: p.captureDestinationURL, format: p.fileNameFormat, ext: p.imageCaptureFormat.fileExtension)
+                target = TokenFormatter.uniqueFileURL(in: p.captureDestinationURL, format: p.fileNameFormat, ext: format.fileExtension)
             }
         }
-        guard let target, let data = encode(cg, format: p.imageCaptureFormat) else { return nil }
+        guard let target, let data = encode(cg, format: format) else { return nil }
+        try? FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
         do {
             try data.write(to: target)
             if p.clickSound { playClick() }

@@ -36,7 +36,7 @@ for arg in "$@"; do
     esac
 done
 
-OUT="build"
+OUT="${OPENCAPTURE_OUT:-build}"   # override for side builds that must not touch build/
 APP="$OUT/OpenCapture.app"
 DEPLOY_MIN="${OPENCAPTURE_MIN_MACOS:-14.0}"
 ARCHS="${OPENCAPTURE_ARCHS:-arm64 x86_64}"   # universal by default; set OPENCAPTURE_ARCHS=arm64 for a quick local build

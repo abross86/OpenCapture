@@ -48,7 +48,12 @@ private func enumInt(_ v: Any?) -> Int? {
     }
 }
 @objc(StopCaptureScriptCommand) final class StopCaptureScriptCommand: NSScriptCommand {
-    override func performDefaultImplementation() -> Any? { AppController.shared.stopAnyCapture(); return nil }
+    override func performDefaultImplementation() -> Any? {
+        let app = AppController.shared
+        let path = app.currentOutputURL?.path ?? ""
+        app.stopAnyCapture()
+        return path
+    }
 }
 @objc(SaveImageScriptCommand) final class SaveImageScriptCommand: NSScriptCommand {
     override func performDefaultImplementation() -> Any? {
@@ -122,4 +127,92 @@ private func enumInt(_ v: Any?) -> Int? {
         if let v = num("audiodelay") { p.audioDelayMs = Int(v) }
         return nil
     }
+}
+
+// MARK: - OpenCapture Suite verbs
+
+private func fileArg(_ cmd: NSScriptCommand, _ key: String) -> URL? { fileURL(cmd.evaluatedArguments?[key]) }
+
+@objc(RecordMovieCommand) final class RecordMovieCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let app = AppController.shared
+        guard app.mode == .idle else { scriptErrorNumber = 1; scriptErrorString = "A capture is already in progress."; return nil }
+        let secs = (evaluatedArguments?["duration"] as? NSNumber)?.doubleValue
+        guard app.startRecording(to: fileArg(self, "path"), limitSeconds: secs.map { Int($0.rounded(.up)) }) else {
+            scriptErrorNumber = 1; scriptErrorString = "Could not start recording: \(AppController.shared.scriptLastError)"; return nil
+        }
+        return app.currentOutputURL?.path ?? ""
+    }
+}
+@objc(CaptureImageCommand) final class CaptureImageCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let url = fileArg(self, "path")
+        var format = (evaluatedArguments?["format"] as? NSNumber).flatMap { ImageFileFormat(rawValue: $0.intValue) }
+        if format == nil, let ext = url?.pathExtension.lowercased() {
+            switch ext { case "jpg", "jpeg": format = .jpeg; case "png": format = .png; case "tif", "tiff": format = .tiff; default: break }
+        }
+        guard let saved = ImageCapture.save(to: url, format: format) else {
+            scriptErrorNumber = 4; scriptErrorString = "Could not save image: \(AppController.shared.scriptLastError)"; return nil
+        }
+        return saved.path
+    }
+}
+@objc(CopyImageCommand) final class CopyImageCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        guard CaptureEngine.shared.latestFrame != nil else { scriptErrorNumber = 4; scriptErrorString = "No video frame available."; return nil }
+        ImageCapture.copyToPasteboard(); return nil
+    }
+}
+@objc(StartTimelapseCommand) final class StartTimelapseCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let app = AppController.shared
+        guard app.mode == .idle else { scriptErrorNumber = 1; scriptErrorString = "A capture is already in progress."; return nil }
+        guard app.startTimelapse(to: fileArg(self, "path"), continuing: fileArg(self, "continuing")) else {
+            scriptErrorNumber = 1; scriptErrorString = "Could not start timelapse: \(app.scriptLastError)"; return nil
+        }
+        return app.currentOutputURL?.path ?? ""
+    }
+}
+@objc(StartStopMotionCommand) final class StartStopMotionCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let app = AppController.shared
+        guard app.mode == .idle else { scriptErrorNumber = 1; scriptErrorString = "A capture is already in progress."; return nil }
+        guard app.startStopMotion(to: fileArg(self, "path"), continuing: fileArg(self, "continuing")) else {
+            scriptErrorNumber = 1; scriptErrorString = "Could not start stop motion: \(app.scriptLastError)"; return nil
+        }
+        return app.currentOutputURL?.path ?? ""
+    }
+}
+@objc(AddStopMotionFrameCommand) final class AddStopMotionFrameCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        guard let sm = AppController.shared.stopMotion else { scriptErrorNumber = 2; scriptErrorString = "No stop-motion capture is in progress."; return nil }
+        guard sm.captureFrame() else { scriptErrorNumber = 3; scriptErrorString = "Stop-motion capture is busy (averaging or writing)."; return nil }
+        if sm.averagingCount > 1 {   // averaging completes asynchronously on the video queue; wait briefly so the count is accurate
+            let deadline = Date().addingTimeInterval(5)
+            while sm.isAveraging && Date() < deadline { RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
+        }
+        return sm.frameCount
+    }
+}
+@objc(ExportStopMotionFramesCommand) final class ExportStopMotionFramesCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        guard let sm = AppController.shared.stopMotion else { scriptErrorNumber = 2; scriptErrorString = "No stop-motion capture is in progress."; return nil }
+        guard let folder = fileArg(self, "folder") else { scriptErrorNumber = 7; scriptErrorString = "A destination folder is required."; return nil }
+        var done = false, failure: Error?
+        sm.exportStills(to: folder, format: Prefs.shared.imageCaptureFormat) { err in failure = err; done = true }
+        let deadline = Date().addingTimeInterval(120)
+        while !done && Date() < deadline { RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
+        if let failure { scriptErrorNumber = 8; scriptErrorString = "Export failed: \(failure.localizedDescription)" }
+        return nil
+    }
+}
+@objc(ResetAdjustmentsCommand) final class ResetAdjustmentsCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let p = Prefs.shared
+        p.brightness = 0; p.contrast = 0; p.cbAdjust = 0; p.crAdjust = 0; p.sharpness = 0
+        return nil
+    }
+}
+@objc(RefreshDevicesCommand) final class RefreshDevicesCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? { DeviceManager.shared.refresh(); return nil }
 }

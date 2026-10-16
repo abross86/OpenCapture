@@ -57,21 +57,59 @@ AVCaptureAudioDataOutput (float32)
 
 ## AppleScript
 
+OpenCapture is fully scriptable. Every preference is a read/write property of the application,
+live state is readable, and the capture verbs return the file they created. Open the dictionary in
+Script Editor (File › Open Dictionary › OpenCapture) for the complete list; ready-made examples are
+in `Scripts/`.
+
 ```applescript
 tell application "OpenCapture"
-    set preferences video encoding h264_high audio encoding aac_high
-    start capture to file "/Users/me/Desktop/clip.mp4"
-    delay 10
-    stop capture
-    save image to file "/Users/me/Desktop/frame.jpg"
-    set s to status
-    videoWidth of s
+    -- live state
+    video device name            -- "USB Video"
+    video width & video height   -- 1920, 1080
+    frame rate                   -- 59.94
+    video formats                -- {"1920 × 1080  MJPEG  60 fps", "1280 × 720  YUV 4:2:2  30 fps", …}
+
+    -- preferences are properties
+    set video source to "USB Video"
+    set video format to "1920 × 1080  MJPEG  60 fps"
+    set audio source to "USB Audio"
+    set video encoding to h264_high
+    set brightness to 5
+    set text overlay to "+Y-+M-+D +h:+m:+s"
+
+    -- capture verbs return the path they wrote
+    set img to capture image to file "/Users/me/Desktop/frame.png"
+    set clip to record movie to file "/Users/me/Desktop/clip.mp4" for 10
+    repeat while recording
+        delay 0.5
+    end repeat
+
+    start timelapse to file "/Users/me/Desktop/tl.mp4"
+    delay 600
+    stop recording
+
+    start stop motion to file "/Users/me/Desktop/anim.mov"
+    add stop motion frame
+    add stop motion frame
+    export stop motion frames to folder "/Users/me/Desktop/anim-frames"
+    stop recording
 end tell
 ```
 
-Commands: `start capture`, `start timelapse capture`, `start stopmotion capture`, `capture stopmotion frame`,
-`stop capture`, `save image`, `set preferences`, `video sources`, `audio sources`, `status`.
-Open the dictionary in Script Editor (File › Open Dictionary) for every parameter.
+Verbs: `record movie` (`to file`, `for` seconds), `stop recording`, `capture image` (`to file`, `in format`),
+`copy image`, `start timelapse`, `start stop motion` (both take `to file` / `continuing`), `add stop motion frame`,
+`export stop motion frames to folder`, `reset image adjustments`, `refresh devices`.
+
+The SwiftCapture command names (`start capture`, `stop capture`, `save image`, `status`,
+`set preferences`, `video sources`, `audio sources`, …) are kept in a compatibility suite, so
+existing scripts only need `tell application "OpenCapture"`.
+
+From the shell:
+
+```bash
+osascript -e 'tell application "OpenCapture" to capture image to file "/tmp/frame.jpg"'
+```
 
 ## Troubleshooting
 

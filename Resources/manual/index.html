@@ -60,12 +60,21 @@ output.</p>
 <kbd>⌥⌘</kbd>+arrow keys.</p>
 
 <h2>AppleScript</h2>
-<p>Open OpenCapture's dictionary in Script Editor. Example:</p>
+<p>Everything in Preferences is a property of the application, live state is readable, and the capture commands
+return the file they wrote. Open the dictionary in Script Editor (File &rsaquo; Open Dictionary) for the full list.</p>
 <pre><code>tell application "OpenCapture"
-    start capture to file "/Users/me/Desktop/clip.mp4"
-    delay 10
-    stop capture
+    set video source to "USB Video"
+    set video encoding to h264_high
+    set img to capture image to file "/Users/me/Desktop/frame.png"
+    set clip to record movie to file "/Users/me/Desktop/clip.mp4" for 10
+    repeat while recording
+        delay 0.5
+    end repeat
 end tell</code></pre>
+<p>Commands: <code>record movie</code>, <code>stop recording</code>, <code>capture image</code>, <code>copy image</code>,
+<code>start timelapse</code>, <code>start stop motion</code>, <code>add stop motion frame</code>,
+<code>export stop motion frames</code>, <code>reset image adjustments</code>, <code>refresh devices</code>.
+The SwiftCapture command names also still work. Example scripts ship in the project's <code>Scripts</code> folder.</p>
 
 <h2>Help</h2>
 <p>If a device does not appear: check System Settings › Privacy &amp; Security › Camera and Microphone, unplug and reconnect the

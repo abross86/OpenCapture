@@ -1,9 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
-<!-- Command names and codes mirror the SwiftCapture suite so existing scripts keep working
-     after changing `tell application "SwiftCapture"` to `tell application "OpenCapture"`. -->
 <dictionary title="OpenCapture Dictionary">
-	<suite name="OpenCapture" code="Sync" description="Capture control">
+
+	<!-- ===================================================================================== -->
+	<suite name="Standard Suite" code="????" description="Common commands for all applications.">
+		<command name="quit" code="aevtquit" description="Quit OpenCapture."><cocoa class="NSQuitCommand"/></command>
+		<class name="application" code="capp" description="The OpenCapture application.">
+			<cocoa class="NSApplication"/>
+			<property name="name" code="pnam" type="text" access="r" description="The name of the application."/>
+			<property name="frontmost" code="pisf" type="boolean" access="r" description="Is this the frontmost (active) application?"><cocoa key="isActive"/></property>
+			<property name="version" code="vers" type="text" access="r" description="The version of the application."><cocoa key="scriptVersion"/></property>
+		</class>
+	</suite>
+
+	<!-- ===================================================================================== -->
+	<suite name="OpenCapture Suite" code="OCap" description="Live video and audio capture.">
+
+		<enumeration name="capture mode" code="OCmd" description="What the application is currently capturing">
+			<enumerator name="idle" code="Cm00" description="Not capturing"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="movie" code="Cm01" description="Recording a movie"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="timelapse" code="Cm02" description="Recording a timelapse"><cocoa integer-value="2"/></enumerator>
+			<enumerator name="stop motion" code="Cm03" description="Building a stop-motion movie"><cocoa integer-value="3"/></enumerator>
+		</enumeration>
+		<enumeration name="image format" code="OCif" description="Still image file format">
+			<enumerator name="jpeg" code="If00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="png" code="If01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="tiff" code="If02"><cocoa integer-value="2"/></enumerator>
+		</enumeration>
+		<enumeration name="image size" code="OCis" description="Still image size relative to the video">
+			<enumerator name="full size" code="Is00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="half size" code="Is01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="quarter size" code="Is02"><cocoa integer-value="2"/></enumerator>
+		</enumeration>
+		<enumeration name="video transformation" code="OCtr" description="Flip or rotation applied to the video">
+			<enumerator name="no transformation" code="Tr00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="flip horizontal" code="Tr01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="flip vertical" code="Tr02"><cocoa integer-value="2"/></enumerator>
+			<enumerator name="rotate 90" code="Tr03" description="90° clockwise"><cocoa integer-value="3"/></enumerator>
+			<enumerator name="rotate 180" code="Tr04"><cocoa integer-value="4"/></enumerator>
+			<enumerator name="rotate 270" code="Tr05" description="90° anticlockwise"><cocoa integer-value="5"/></enumerator>
+		</enumeration>
 		<enumeration name="videoEncoding" code="venc" description="The video encoding format">
 			<enumerator name="h264_low" code="Ve00"><cocoa integer-value="0"/></enumerator>
 			<enumerator name="h264_medium" code="Ve01"><cocoa integer-value="1"/></enumerator>
@@ -32,79 +68,196 @@
 			<enumerator name="mono_24bit_48khz" code="Af06"><cocoa integer-value="6"/></enumerator>
 			<enumerator name="stereo_24bit_48khz" code="Af07"><cocoa integer-value="7"/></enumerator>
 		</enumeration>
+
+		<class-extension extends="application" description="Live capture state and preferences. Setting a property changes the preference immediately.">
+			<!-- Live state (read-only) -->
+			<property name="video live" code="OCvl" type="boolean" access="r" description="True while video frames are arriving."><cocoa key="scriptVideoLive"/></property>
+			<property name="audio live" code="OCal" type="boolean" access="r" description="True while audio is arriving."><cocoa key="scriptAudioLive"/></property>
+			<property name="video device name" code="OCvn" type="text" access="r" description="Name of the active video device, or empty."><cocoa key="scriptVideoDeviceName"/></property>
+			<property name="audio device name" code="OCan" type="text" access="r" description="Name of the active audio device, or empty."><cocoa key="scriptAudioDeviceName"/></property>
+			<property name="video width" code="OCvw" type="integer" access="r" description="Width of the live video in pixels (after transformation)."><cocoa key="scriptVideoWidth"/></property>
+			<property name="video height" code="OCvh" type="integer" access="r" description="Height of the live video in pixels (after transformation)."><cocoa key="scriptVideoHeight"/></property>
+			<property name="frame rate" code="OCfr" type="real" access="r" description="Measured incoming frame rate."><cocoa key="scriptFrameRate"/></property>
+			<property name="video sources" code="OCvS" access="r" description="Names of all video input devices."><cocoa key="scriptVideoSources"/><type type="text" list="yes"/></property>
+			<property name="audio sources" code="OCaS" access="r" description="Names of all audio input devices."><cocoa key="scriptAudioSources"/><type type="text" list="yes"/></property>
+			<property name="video formats" code="OCvF" access="r" description="Formats offered by the current video device, e.g. &quot;1920 × 1080  MJPEG  60 fps&quot;."><cocoa key="scriptVideoFormats"/><type type="text" list="yes"/></property>
+			<property name="capture mode" code="OCcm" type="capture mode" access="r" description="What is being captured right now."><cocoa key="scriptCaptureMode"/></property>
+			<property name="recording" code="OCrc" type="boolean" access="r" description="True while any capture (movie, timelapse or stop motion) is in progress."><cocoa key="scriptRecording"/></property>
+			<property name="recording duration" code="OCrd" type="real" access="r" description="Length of the current capture in seconds (movie length for timelapse / stop motion)."><cocoa key="scriptRecordingDuration"/></property>
+			<property name="recording file size" code="OCrs" type="integer" access="r" description="Size of the file being written, in bytes."><cocoa key="scriptRecordingFileSize"/></property>
+			<property name="recording file" code="OCrf" type="text" access="r" description="POSIX path of the file being written, or empty."><cocoa key="scriptRecordingFile"/></property>
+			<property name="stop motion frame count" code="OCsc" type="integer" access="r" description="Frames captured so far in the current stop-motion movie."><cocoa key="scriptStopMotionFrameCount"/></property>
+			<property name="last error" code="OCle" type="text" access="r" description="The most recent error logged, or empty."><cocoa key="scriptLastError"/></property>
+
+			<!-- Video input -->
+			<property name="video source" code="OCvs" type="text" description="Name of the video device to use. &quot;automatic&quot; picks the first capture card or camera."><cocoa key="scriptVideoSource"/></property>
+			<property name="video format" code="OCvf" type="text" description="One of the names from &quot;video formats&quot;, or &quot;automatic&quot;."><cocoa key="scriptVideoFormat"/></property>
+			<property name="requested width" code="OCrw" type="integer" description="Preferred video width in pixels; 0 = maximum."><cocoa key="scriptRequestedWidth"/></property>
+			<property name="requested height" code="OCrh" type="integer" description="Preferred video height in pixels; 0 = maximum."><cocoa key="scriptRequestedHeight"/></property>
+			<property name="requested frame rate" code="OCrr" type="real" description="Preferred frame rate; 0 = maximum."><cocoa key="scriptRequestedFrameRate"/></property>
+			<property name="transformation" code="OCtf" type="video transformation" description="Flip or rotation applied to live and recorded video."><cocoa key="scriptTransformation"/></property>
+			<property name="mirror live video" code="OCml" type="boolean" description="Mirror the live view only (recordings unaffected)."><cocoa key="scriptMirrorLiveVideo"/></property>
+
+			<!-- Audio input -->
+			<property name="audio source" code="OCas" type="text" description="Name of the audio device, &quot;automatic&quot;, or &quot;none&quot; to record without audio."><cocoa key="scriptAudioSource"/></property>
+			<property name="audio format" code="OCaf" type="audioFormat" description="Sample size, rate and channel layout of the captured audio."><cocoa key="scriptAudioFormat"/></property>
+			<property name="audio left channel" code="OCl1" type="integer" description="Input channel number (1-based) used as the left/mono channel."><cocoa key="scriptAudioLeftChannel"/></property>
+			<property name="audio right channel" code="OCr2" type="integer" description="Input channel number (1-based) used as the right channel."><cocoa key="scriptAudioRightChannel"/></property>
+			<property name="audio delay" code="OCad" type="integer" description="Audio delay for movies in milliseconds (positive = audio later)."><cocoa key="scriptAudioDelay"/></property>
+			<property name="audio monitoring" code="OCam" type="boolean" description="Play the captured audio through the Mac's output."><cocoa key="scriptAudioMonitoring"/></property>
+			<property name="audio monitor volume" code="OCav" type="real" description="Monitoring volume from 0 to 1."><cocoa key="scriptAudioMonitorVolume"/></property>
+
+			<!-- Image adjustments (-50 … 50) -->
+			<property name="brightness" code="OCbr" type="real" description="-50 to 50."><cocoa key="scriptBrightness"/></property>
+			<property name="contrast" code="OCct" type="real" description="-50 to 50."><cocoa key="scriptContrast"/></property>
+			<property name="cb adjustment" code="OCcb" type="real" description="Blue/yellow colour, -50 to 50."><cocoa key="scriptCb"/></property>
+			<property name="cr adjustment" code="OCcr" type="real" description="Red/green colour, -50 to 50."><cocoa key="scriptCr"/></property>
+			<property name="saturation" code="OCsa" type="real" description="Overall colour saturation, -50 to 50 (sets Cb and Cr together)."><cocoa key="scriptSaturation"/></property>
+			<property name="sharpness" code="OCsh" type="real" description="-50 to 50."><cocoa key="scriptSharpness"/></property>
+			<property name="text overlay" code="OCto" type="text" description="Text drawn on every frame; use +Y +M +D +h +m +s for date and time."><cocoa key="scriptTextOverlay"/></property>
+			<property name="overlay font size" code="OCof" type="integer" description="Point size of the overlay text."><cocoa key="scriptOverlayFontSize"/></property>
+
+			<!-- Files -->
+			<property name="capture destination" code="OCcd" type="text" description="POSIX path of the folder that receives automatically-named files."><cocoa key="scriptCaptureDestination"/></property>
+			<property name="file name format" code="OCfn" type="text" description="Template for automatic file names, e.g. &quot;+Y-+M-+D +h-+m-+s&quot;."><cocoa key="scriptFileNameFormat"/></property>
+			<property name="ask where to save" code="OCaw" type="boolean" description="Show a save dialog for each capture that has no explicit path."><cocoa key="scriptAskWhereToSave"/></property>
+			<property name="image capture format" code="OCic" type="image format" description="File format for saved still images."><cocoa key="scriptImageCaptureFormat"/></property>
+			<property name="image copy format" code="OCip" type="image format" description="Format used when copying or dragging images."><cocoa key="scriptImageCopyFormat"/></property>
+			<property name="image capture size" code="OCiz" type="image size" description="Size of saved still images."><cocoa key="scriptImageCaptureSize"/></property>
+			<property name="click sound" code="OCck" type="boolean" description="Play a click when an image is captured."><cocoa key="scriptClickSound"/></property>
+
+			<!-- Timelapse / stop motion -->
+			<property name="timelapse frames" code="OCtn" type="integer" description="Frames captured per interval."><cocoa key="scriptTimelapseFrames"/></property>
+			<property name="timelapse interval" code="OCti" type="real" description="Seconds between captures."><cocoa key="scriptTimelapseInterval"/></property>
+			<property name="timelapse playback rate" code="OCtp" type="real" description="Frames per second of the resulting movie."><cocoa key="scriptTimelapsePlaybackRate"/></property>
+			<property name="stop motion averaging" code="OCsv" type="integer" description="Video frames averaged per stop-motion capture (noise reduction)."><cocoa key="scriptStopMotionAveraging"/></property>
+			<property name="stop motion playback rate" code="OCsp" type="real" description="Frames per second of stop-motion movies."><cocoa key="scriptStopMotionPlaybackRate"/></property>
+			<property name="onion skin" code="OCos" type="boolean" description="Overlay the live video on the selected stop-motion frame."><cocoa key="scriptOnionSkin"/></property>
+
+			<!-- Encoding -->
+			<property name="video encoding" code="OCve" type="videoEncoding" description="Codec and quality for movies."><cocoa key="scriptVideoEncoding"/></property>
+			<property name="audio encoding" code="OCae" type="audioEncoding" description="Codec and quality for movie audio."><cocoa key="scriptAudioEncoding"/></property>
+
+			<!-- Window -->
+			<property name="float window" code="OCfw" type="boolean" description="Keep the video window above other applications."><cocoa key="scriptFloatWindow"/></property>
+			<property name="show title bar" code="OCtb" type="boolean" description="Show the video window's title bar."><cocoa key="scriptShowTitleBar"/></property>
+		</class-extension>
+
+		<command name="record movie" code="OCaprecm" description="Start recording a movie. Returns the POSIX path of the file.">
+			<cocoa class="RecordMovieCommand"/>
+			<parameter name="to file" code="path" type="text" optional="yes" description="POSIX path for the movie. Without it, a name is generated in the capture destination (or a dialog appears if &quot;ask where to save&quot; is on)."><cocoa key="path"/></parameter>
+			<parameter name="for" code="OCdu" type="real" optional="yes" description="Stop automatically after this many seconds."><cocoa key="duration"/></parameter>
+			<result type="text" description="POSIX path of the movie being written."/>
+		</command>
+		<command name="stop recording" code="OCapstop" description="Stop the current movie, timelapse or stop-motion capture. Returns the path of the finished file.">
+			<cocoa class="StopCaptureScriptCommand"/>
+			<result type="text" description="POSIX path of the file that was being written, or empty."/>
+		</command>
+		<command name="capture image" code="OCapcimg" description="Save the current video frame as an image file. Returns the POSIX path.">
+			<cocoa class="CaptureImageCommand"/>
+			<parameter name="to file" code="path" type="text" optional="yes" description="POSIX path for the image. The extension (.jpg/.png/.tiff) selects the format unless &quot;in format&quot; is given."><cocoa key="path"/></parameter>
+			<parameter name="in format" code="OCif" type="image format" optional="yes" description="Image file format."><cocoa key="format"/></parameter>
+			<result type="text" description="POSIX path of the saved image."/>
+		</command>
+		<command name="copy image" code="OCapcopy" description="Put the current video frame on the clipboard.">
+			<cocoa class="CopyImageCommand"/>
+		</command>
+		<command name="start timelapse" code="OCaptlps" description="Start a timelapse capture using the timelapse preferences. Returns the POSIX path of the movie.">
+			<cocoa class="StartTimelapseCommand"/>
+			<parameter name="to file" code="path" type="text" optional="yes" description="POSIX path for the new movie."><cocoa key="path"/></parameter>
+			<parameter name="continuing" code="OCcn" type="text" optional="yes" description="POSIX path of an existing timelapse movie to append to."><cocoa key="continuing"/></parameter>
+			<result type="text"/>
+		</command>
+		<command name="start stop motion" code="OCapsmst" description="Start a stop-motion capture. Add frames with &quot;add stop motion frame&quot;; the movie is written by &quot;stop recording&quot;.">
+			<cocoa class="StartStopMotionCommand"/>
+			<parameter name="to file" code="path" type="text" optional="yes" description="POSIX path for the new movie."><cocoa key="path"/></parameter>
+			<parameter name="continuing" code="OCcn" type="text" optional="yes" description="POSIX path of an existing stop-motion movie to append to."><cocoa key="continuing"/></parameter>
+			<result type="text"/>
+		</command>
+		<command name="add stop motion frame" code="OCapsmfr" description="Capture the live video as the next stop-motion frame. Returns the new frame count.">
+			<cocoa class="AddStopMotionFrameCommand"/>
+			<result type="integer"/>
+		</command>
+		<command name="export stop motion frames" code="OCapsmex" description="Write every frame of the current stop-motion movie as an image file.">
+			<cocoa class="ExportStopMotionFramesCommand"/>
+			<parameter name="to folder" code="OCfo" type="text" description="POSIX path of the destination folder (created if needed)."><cocoa key="folder"/></parameter>
+		</command>
+		<command name="reset image adjustments" code="OCaprsta" description="Set brightness, contrast, Cb, Cr and sharpness back to 0.">
+			<cocoa class="ResetAdjustmentsCommand"/>
+		</command>
+		<command name="refresh devices" code="OCaprfsh" description="Rescan video and audio devices.">
+			<cocoa class="RefreshDevicesCommand"/>
+		</command>
+	</suite>
+
+	<!-- ===================================================================================== -->
+	<suite name="SwiftCapture Compatibility" code="Sync" description="Commands with the same names as SwiftCapture, so existing scripts keep working.">
 		<record-type name="statusRecord" code="strc" description="Current software status">
-			<property name="isVideo" code="vid?" description="True if the live video input is currently working" type="boolean"/>
-			<property name="videoDeviceName" code="vnam" description="The name of the video input device" type="text"/>
-			<property name="videoFrameRate" code="vfps" description="The frame rate of the incoming video" type="number"/>
-			<property name="videoWidth" code="vwid" description="The width in pixels of the video image" type="number"/>
-			<property name="videoHeight" code="vhei" description="The height in pixels of the video image" type="number"/>
-			<property name="isAudio" code="aud?" description="True if the live audio input is currently working" type="boolean"/>
-			<property name="audioDeviceName" code="anam" description="The name of the audio input device" type="text"/>
-			<property name="isRecording" code="rec?" description="True if recording is currently taking place" type="boolean"/>
-			<property name="currentRecordingDuration" code="recd" description="The length of the current recording in seconds" type="number"/>
-			<property name="currentRecordingSize" code="recs" description="The file size of the current recording in bytes" type="number"/>
-			<property name="lastVideoError" code="errv" description="The error code of the last video input error" type="number"/>
-			<property name="lastAudioError" code="erra" description="The error code of the last audio input error" type="number"/>
-			<property name="lastRecordingError" code="errr" description="The error code of the last recording error" type="number"/>
-			<property name="videoEncoding" code="venc" description="The video encoding format in use" type="videoEncoding"/>
-			<property name="audioEncoding" code="aenc" description="The audio encoding format in use" type="audioEncoding"/>
+			<property name="isVideo" code="vid?" type="boolean"/>
+			<property name="videoDeviceName" code="vnam" type="text"/>
+			<property name="videoFrameRate" code="vfps" type="number"/>
+			<property name="videoWidth" code="vwid" type="number"/>
+			<property name="videoHeight" code="vhei" type="number"/>
+			<property name="isAudio" code="aud?" type="boolean"/>
+			<property name="audioDeviceName" code="anam" type="text"/>
+			<property name="isRecording" code="rec?" type="boolean"/>
+			<property name="currentRecordingDuration" code="recd" type="number"/>
+			<property name="currentRecordingSize" code="recs" type="number"/>
+			<property name="lastVideoError" code="errv" type="number"/>
+			<property name="lastAudioError" code="erra" type="number"/>
+			<property name="lastRecordingError" code="errr" type="number"/>
+			<property name="videoEncoding" code="venc" type="videoEncoding"/>
+			<property name="audioEncoding" code="aenc" type="audioEncoding"/>
 		</record-type>
 		<command name="start capture" code="startrec" description="Starts a normal movie capture">
 			<cocoa class="StartCaptureScriptCommand"/>
-			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+			<parameter name="to file" code="path" type="text" optional="yes"><cocoa key="path"/></parameter>
 		</command>
 		<command name="start timelapse capture" code="starttim" description="Starts a timelapse capture">
 			<cocoa class="StartTLCaptureScriptCommand"/>
-			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+			<parameter name="to file" code="path" type="text" optional="yes"><cocoa key="path"/></parameter>
 		</command>
 		<command name="start stopmotion capture" code="startsto" description="Starts a stop-motion capture">
 			<cocoa class="StartSMCaptureScriptCommand"/>
-			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+			<parameter name="to file" code="path" type="text" optional="yes"><cocoa key="path"/></parameter>
 		</command>
-		<command name="capture stopmotion frame" code="trigstop" description="Triggers a stop-motion frame capture">
-			<cocoa class="TriggerSMCaptureScriptCommand"/>
-		</command>
-		<command name="stop capture" code="stopreco" description="Stops the current capture">
-			<cocoa class="StopCaptureScriptCommand"/>
-		</command>
+		<command name="capture stopmotion frame" code="trigstop" description="Triggers a stop-motion frame capture"><cocoa class="TriggerSMCaptureScriptCommand"/></command>
+		<command name="stop capture" code="stopreco" description="Stops the current capture"><cocoa class="StopCaptureScriptCommand"/></command>
 		<command name="save image" code="saveimag" description="Saves an image file">
 			<cocoa class="SaveImageScriptCommand"/>
-			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+			<parameter name="to file" code="path" type="text" optional="yes"><cocoa key="path"/></parameter>
 		</command>
-		<command name="set preferences" code="setprefs" description="Changes capture preferences">
+		<command name="set preferences" code="setprefs" description="Changes capture preferences (the application properties do the same)">
 			<cocoa class="SetPreferencesCommand"/>
-			<parameter name="video source" code="vsou" description="Video source name" type="text" optional="yes"><cocoa key="videosource"/></parameter>
-			<parameter name="audio source" code="asou" description="Audio source name, or &quot;none&quot; to disable audio" type="text" optional="yes"><cocoa key="audiosource"/></parameter>
-			<parameter name="capture destination" code="capt" description="Path to the folder where files should be saved" type="text" optional="yes"><cocoa key="capturedestination"/></parameter>
-			<parameter name="file confirm" code="conf" description="True to confirm the location and name of each saved file" type="boolean" optional="yes"><cocoa key="fileconfirm"/></parameter>
-			<parameter name="file name format" code="filn" description="The format for automatically-generated file names" type="text" optional="yes"><cocoa key="filenameformat"/></parameter>
-			<parameter name="width" code="wdth" description="Video width in pixels (0 = maximum)" type="number" optional="yes"><cocoa key="width"/></parameter>
-			<parameter name="height" code="hght" description="Video height in pixels (0 = maximum)" type="number" optional="yes"><cocoa key="height"/></parameter>
-			<parameter name="frame rate" code="frra" description="Frame rate of the video source (0 = maximum)" type="number" optional="yes"><cocoa key="framerate"/></parameter>
-			<parameter name="text overlay" code="ovly" description="Text to overlay onto the video image" type="text" optional="yes"><cocoa key="overlay"/></parameter>
-			<parameter name="font size" code="font" description="Text overlay font size" type="number" optional="yes"><cocoa key="fontsize"/></parameter>
-			<parameter name="brightness" code="brit" description="Video brightness from -50 to 50" type="number" optional="yes"><cocoa key="brightness"/></parameter>
-			<parameter name="contrast" code="cont" description="Video contrast from -50 to 50" type="number" optional="yes"><cocoa key="contrast"/></parameter>
-			<parameter name="sharpness" code="shar" description="Video sharpness from -50 to 50" type="number" optional="yes"><cocoa key="sharpness"/></parameter>
-			<parameter name="saturation" code="satu" description="Video saturation from -50 to 50 (sets Cb and Cr together)" type="number" optional="yes"><cocoa key="saturation"/></parameter>
-			<parameter name="cb" code="cbad" description="Video Cb saturation from -50 to 50" type="number" optional="yes"><cocoa key="cb"/></parameter>
-			<parameter name="cr" code="crad" description="Video Cr saturation from -50 to 50" type="number" optional="yes"><cocoa key="cr"/></parameter>
-			<parameter name="video encoding" code="venc" description="Video encoding format for movies" type="videoEncoding" optional="yes"><cocoa key="videoencoding"/></parameter>
-			<parameter name="audio encoding" code="aenc" description="Audio encoding format for movies" type="audioEncoding" optional="yes"><cocoa key="audioencoding"/></parameter>
-			<parameter name="audio format" code="afor" description="Format of the incoming audio" type="audioFormat" optional="yes"><cocoa key="audioformat"/></parameter>
-			<parameter name="audio delay" code="adel" description="Audio delay for movies, in milliseconds" type="number" optional="yes"><cocoa key="audiodelay"/></parameter>
+			<parameter name="video source" code="OCvs" type="text" optional="yes"><cocoa key="videosource"/></parameter>
+			<parameter name="audio source" code="OCas" type="text" optional="yes"><cocoa key="audiosource"/></parameter>
+			<parameter name="capture destination" code="OCcd" type="text" optional="yes"><cocoa key="capturedestination"/></parameter>
+			<parameter name="file confirm" code="conf" type="boolean" optional="yes"><cocoa key="fileconfirm"/></parameter>
+			<parameter name="file name format" code="OCfn" type="text" optional="yes"><cocoa key="filenameformat"/></parameter>
+			<parameter name="width" code="wdth" type="number" optional="yes"><cocoa key="width"/></parameter>
+			<parameter name="height" code="hght" type="number" optional="yes"><cocoa key="height"/></parameter>
+			<parameter name="frame rate" code="OCfr" type="number" optional="yes"><cocoa key="framerate"/></parameter>
+			<parameter name="text overlay" code="OCto" type="text" optional="yes"><cocoa key="overlay"/></parameter>
+			<parameter name="font size" code="font" type="number" optional="yes"><cocoa key="fontsize"/></parameter>
+			<parameter name="brightness" code="OCbr" type="number" optional="yes"><cocoa key="brightness"/></parameter>
+			<parameter name="contrast" code="OCct" type="number" optional="yes"><cocoa key="contrast"/></parameter>
+			<parameter name="sharpness" code="OCsh" type="number" optional="yes"><cocoa key="sharpness"/></parameter>
+			<parameter name="saturation" code="OCsa" type="number" optional="yes"><cocoa key="saturation"/></parameter>
+			<parameter name="cb" code="cbad" type="number" optional="yes"><cocoa key="cb"/></parameter>
+			<parameter name="cr" code="crad" type="number" optional="yes"><cocoa key="cr"/></parameter>
+			<parameter name="video encoding" code="OCve" type="videoEncoding" optional="yes"><cocoa key="videoencoding"/></parameter>
+			<parameter name="audio encoding" code="OCae" type="audioEncoding" optional="yes"><cocoa key="audioencoding"/></parameter>
+			<parameter name="audio format" code="OCaf" type="audioFormat" optional="yes"><cocoa key="audioformat"/></parameter>
+			<parameter name="audio delay" code="OCad" type="number" optional="yes"><cocoa key="audiodelay"/></parameter>
 		</command>
 		<command name="video sources" code="getvidso" description="Returns a list of available video sources">
-			<cocoa class="GetVideoSourcesCommand"/>
-			<result description="The list of available video sources"><type type="text" list="yes"/></result>
+			<cocoa class="GetVideoSourcesCommand"/><result><type type="text" list="yes"/></result>
 		</command>
 		<command name="audio sources" code="getaudso" description="Returns a list of available audio sources">
-			<cocoa class="GetAudioSourcesCommand"/>
-			<result description="The list of available audio sources"><type type="text" list="yes"/></result>
+			<cocoa class="GetAudioSourcesCommand"/><result><type type="text" list="yes"/></result>
 		</command>
 		<command name="status" code="Syncstat" description="Returns the current status of the software">
-			<cocoa class="GetStatusCommand"/>
-			<result description="A record that describes the current software status" type="statusRecord"/>
+			<cocoa class="GetStatusCommand"/><result type="statusRecord"/>
 		</command>
 	</suite>
 </dictionary>

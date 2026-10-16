@@ -108,6 +108,15 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuItemValidation
         case .idle: return 0
         }
     }
+    /// The file the current capture will produce (the final path, even while a temp file is in use).
+    var currentOutputURL: URL? {
+        switch mode {
+        case .recording: return recorder?.url
+        case .timelapse: return timelapseFinalURL ?? timelapse?.recorder.url
+        case .stopMotion: return stopMotion?.url
+        case .idle: return nil
+        }
+    }
     var currentFileSize: Int64 {
         switch mode {
         case .recording: return recorder?.fileSize ?? 0
