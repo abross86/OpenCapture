@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>OpenCapture User Manual</title>
+<style>
+body{font:15px/1.5 -apple-system,Helvetica,Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#222}
+h1{font-size:28px}h2{margin-top:32px;border-bottom:1px solid #ddd;padding-bottom:4px}
+code,kbd{font-family:Menlo,monospace;background:#f3f3f3;padding:1px 4px;border-radius:3px}
+dt{font-weight:600;margin-top:10px}dd{margin-left:0;color:#444}
+</style></head><body>
+<h1>OpenCapture User Manual</h1>
+<p>OpenCapture shows, records and photographs video from USB capture cards, webcams and any other video source your Mac
+recognises. On first launch the first available video and audio inputs are selected automatically; change them in
+<b>OpenCapture › Preferences…</b> (<kbd>⌘,</kbd>).</p>
+
+<h2>Preferences</h2>
+<dl>
+<dt>Video source / Video input &amp; format</dt><dd>Choose the device and, optionally, one of its stream formats
+(size, pixel format, frame rate). "Automatic" picks the best match for the size and frame rate below.</dd>
+<dt>Video size / frame rate</dt><dd>Leave empty for the maximum the device supports.</dd>
+<dt>Video buffer size</dt><dd>"None" drops late frames for the lowest latency; larger settings keep more frames queued.</dd>
+<dt>Video transformation</dt><dd>Flip or rotate the picture; applies to the live view and to recordings. "Live video horizontal
+flip" mirrors only the live view.</dd>
+<dt>Audio source / format / channels</dt><dd>Pick the input, 16/24-bit at 44.1/48 kHz, and which input channels become the
+left and right channels of the recording.</dd>
+<dt>Audio delay for movies</dt><dd>Positive values move the audio later, negative earlier (milliseconds).</dd>
+<dt>Image adjustments</dt><dd>Brightness, contrast, Cb (blue/yellow) and Cr (red/green) colour, sharpness. Set Cb and Cr to the same
+value to change overall saturation.</dd>
+<dt>File name format</dt><dd>Use <code>+Y +y +M +D +h +m +s</code> for year, 2-digit year, month, day, hour, minute, second.</dd>
+<dt>Capture destination</dt><dd>Ask every time, or save automatically to a folder (Desktop by default).</dd>
+<dt>Text overlay</dt><dd>Text drawn at the top-left of every frame (live and recorded); the same date/time tokens apply.</dd>
+<dt>Video / audio encoding</dt><dd>H.264 and H.265 give the smallest files (MP4 with AAC). JPEG and ProRes are
+intermediate formats saved as MOV. Stop-motion movies never use H.264/H.265 so that frames stay independent.</dd>
+</dl>
+
+<h2>Image capture</h2>
+<p><b>File › Save Image</b> (<kbd>⌘S</kbd>) saves the current frame. <b>Edit › Copy</b> (<kbd>⌘C</kbd>) puts it on the clipboard.
+You can also <b>drag</b> the picture out of the window into the Finder or another application.</p>
+
+<h2>Video capture</h2>
+<p><b>File › Start Recording…</b> (<kbd>⌘R</kbd>) starts a movie; the status bar at the bottom of the window shows the duration,
+frame rate and file size. Choose the same item again to stop. <b>Start Time-Limited Recording…</b> stops automatically after the
+chosen duration.</p>
+
+<h2>Timelapse capture</h2>
+<p>Captures the configured number of frames every interval and writes them at the playback rate, so slow events play back fast.
+<b>Continue Timelapse Recording…</b> appends to an existing movie.</p>
+
+<h2>Stop-motion capture</h2>
+<p>The Stop-Motion window shows your movie as it is built. Press <kbd>Return</kbd> (in either window) to add a frame from the live
+video. <b>Onion skin</b> (<kbd>O</kbd>) overlays the live picture on the selected frame at 50% so you can line up the next shot.
+<kbd>Space</kbd> plays the movie; the scrubber jumps to any frame; <kbd>Delete</kbd> removes the selected frame; <b>Edit › Undo</b>
+reverts captures. Frame averaging (Preferences) averages several video frames per capture to remove sensor noise — keep the scene
+still while it runs. <b>Export Stop-Motion Still Image Files…</b> writes every frame as an image.</p>
+
+<h2>Audio</h2>
+<p><b>Window › Audio</b> shows level meters. <b>Audio › Monitor Audio Through Speakers</b> plays the captured sound on the Mac's
+output.</p>
+
+<h2>Keyboard &amp; window</h2>
+<p>Double-click the picture for full screen. The Video menu toggles float-on-top and the title bar, and nudges the window with
+<kbd>⌥⌘</kbd>+arrow keys.</p>
+
+<h2>AppleScript</h2>
+<p>Open OpenCapture's dictionary in Script Editor. Example:</p>
+<pre><code>tell application "OpenCapture"
+    start capture to file "/Users/me/Desktop/clip.mp4"
+    delay 10
+    stop capture
+end tell</code></pre>
+
+<h2>Help</h2>
+<p>If a device does not appear: check System Settings › Privacy &amp; Security › Camera and Microphone, unplug and reconnect the
+device, and look at <b>Window › Log</b> (also saved to <code>~/Library/Logs/OpenCapture.log</code>).</p>
+</body></html>

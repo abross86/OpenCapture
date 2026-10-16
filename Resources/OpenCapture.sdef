@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+<!-- Command names and codes mirror the SwiftCapture suite so existing scripts keep working
+     after changing `tell application "SwiftCapture"` to `tell application "OpenCapture"`. -->
+<dictionary title="OpenCapture Dictionary">
+	<suite name="OpenCapture" code="Sync" description="Capture control">
+		<enumeration name="videoEncoding" code="venc" description="The video encoding format">
+			<enumerator name="h264_low" code="Ve00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="h264_medium" code="Ve01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="h264_high" code="Ve02"><cocoa integer-value="2"/></enumerator>
+			<enumerator name="jpeg_high" code="Ve03"><cocoa integer-value="3"/></enumerator>
+			<enumerator name="prores_lt" code="Ve04"><cocoa integer-value="4"/></enumerator>
+			<enumerator name="prores" code="Ve05"><cocoa integer-value="5"/></enumerator>
+			<enumerator name="prores_hq" code="Ve06"><cocoa integer-value="6"/></enumerator>
+			<enumerator name="h265_low" code="Ve07"><cocoa integer-value="7"/></enumerator>
+			<enumerator name="h265_medium" code="Ve08"><cocoa integer-value="8"/></enumerator>
+			<enumerator name="h265_high" code="Ve09"><cocoa integer-value="9"/></enumerator>
+		</enumeration>
+		<enumeration name="audioEncoding" code="aenc" description="The audio encoding format">
+			<enumerator name="aac_low" code="Ae00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="aac_medium" code="Ae01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="aac_high" code="Ae02"><cocoa integer-value="2"/></enumerator>
+			<enumerator name="uncompressed" code="Ae03"><cocoa integer-value="3"/></enumerator>
+		</enumeration>
+		<enumeration name="audioFormat" code="afor" description="The audio format">
+			<enumerator name="mono_16bit_44khz" code="Af00"><cocoa integer-value="0"/></enumerator>
+			<enumerator name="stereo_16bit_44khz" code="Af01"><cocoa integer-value="1"/></enumerator>
+			<enumerator name="mono_16bit_48khz" code="Af02"><cocoa integer-value="2"/></enumerator>
+			<enumerator name="stereo_16bit_48khz" code="Af03"><cocoa integer-value="3"/></enumerator>
+			<enumerator name="mono_24bit_44khz" code="Af04"><cocoa integer-value="4"/></enumerator>
+			<enumerator name="stereo_24bit_44khz" code="Af05"><cocoa integer-value="5"/></enumerator>
+			<enumerator name="mono_24bit_48khz" code="Af06"><cocoa integer-value="6"/></enumerator>
+			<enumerator name="stereo_24bit_48khz" code="Af07"><cocoa integer-value="7"/></enumerator>
+		</enumeration>
+		<record-type name="statusRecord" code="strc" description="Current software status">
+			<property name="isVideo" code="vid?" description="True if the live video input is currently working" type="boolean"/>
+			<property name="videoDeviceName" code="vnam" description="The name of the video input device" type="text"/>
+			<property name="videoFrameRate" code="vfps" description="The frame rate of the incoming video" type="number"/>
+			<property name="videoWidth" code="vwid" description="The width in pixels of the video image" type="number"/>
+			<property name="videoHeight" code="vhei" description="The height in pixels of the video image" type="number"/>
+			<property name="isAudio" code="aud?" description="True if the live audio input is currently working" type="boolean"/>
+			<property name="audioDeviceName" code="anam" description="The name of the audio input device" type="text"/>
+			<property name="isRecording" code="rec?" description="True if recording is currently taking place" type="boolean"/>
+			<property name="currentRecordingDuration" code="recd" description="The length of the current recording in seconds" type="number"/>
+			<property name="currentRecordingSize" code="recs" description="The file size of the current recording in bytes" type="number"/>
+			<property name="lastVideoError" code="errv" description="The error code of the last video input error" type="number"/>
+			<property name="lastAudioError" code="erra" description="The error code of the last audio input error" type="number"/>
+			<property name="lastRecordingError" code="errr" description="The error code of the last recording error" type="number"/>
+			<property name="videoEncoding" code="venc" description="The video encoding format in use" type="videoEncoding"/>
+			<property name="audioEncoding" code="aenc" description="The audio encoding format in use" type="audioEncoding"/>
+		</record-type>
+		<command name="start capture" code="startrec" description="Starts a normal movie capture">
+			<cocoa class="StartCaptureScriptCommand"/>
+			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+		</command>
+		<command name="start timelapse capture" code="starttim" description="Starts a timelapse capture">
+			<cocoa class="StartTLCaptureScriptCommand"/>
+			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+		</command>
+		<command name="start stopmotion capture" code="startsto" description="Starts a stop-motion capture">
+			<cocoa class="StartSMCaptureScriptCommand"/>
+			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+		</command>
+		<command name="capture stopmotion frame" code="trigstop" description="Triggers a stop-motion frame capture">
+			<cocoa class="TriggerSMCaptureScriptCommand"/>
+		</command>
+		<command name="stop capture" code="stopreco" description="Stops the current capture">
+			<cocoa class="StopCaptureScriptCommand"/>
+		</command>
+		<command name="save image" code="saveimag" description="Saves an image file">
+			<cocoa class="SaveImageScriptCommand"/>
+			<parameter name="to file" code="path" description="An absolute POSIX path to the file that is to be created." type="text" optional="yes"><cocoa key="path"/></parameter>
+		</command>
+		<command name="set preferences" code="setprefs" description="Changes capture preferences">
+			<cocoa class="SetPreferencesCommand"/>
+			<parameter name="video source" code="vsou" description="Video source name" type="text" optional="yes"><cocoa key="videosource"/></parameter>
+			<parameter name="audio source" code="asou" description="Audio source name, or &quot;none&quot; to disable audio" type="text" optional="yes"><cocoa key="audiosource"/></parameter>
+			<parameter name="capture destination" code="capt" description="Path to the folder where files should be saved" type="text" optional="yes"><cocoa key="capturedestination"/></parameter>
+			<parameter name="file confirm" code="conf" description="True to confirm the location and name of each saved file" type="boolean" optional="yes"><cocoa key="fileconfirm"/></parameter>
+			<parameter name="file name format" code="filn" description="The format for automatically-generated file names" type="text" optional="yes"><cocoa key="filenameformat"/></parameter>
+			<parameter name="width" code="wdth" description="Video width in pixels (0 = maximum)" type="number" optional="yes"><cocoa key="width"/></parameter>
+			<parameter name="height" code="hght" description="Video height in pixels (0 = maximum)" type="number" optional="yes"><cocoa key="height"/></parameter>
+			<parameter name="frame rate" code="frra" description="Frame rate of the video source (0 = maximum)" type="number" optional="yes"><cocoa key="framerate"/></parameter>
+			<parameter name="text overlay" code="ovly" description="Text to overlay onto the video image" type="text" optional="yes"><cocoa key="overlay"/></parameter>
+			<parameter name="font size" code="font" description="Text overlay font size" type="number" optional="yes"><cocoa key="fontsize"/></parameter>
+			<parameter name="brightness" code="brit" description="Video brightness from -50 to 50" type="number" optional="yes"><cocoa key="brightness"/></parameter>
+			<parameter name="contrast" code="cont" description="Video contrast from -50 to 50" type="number" optional="yes"><cocoa key="contrast"/></parameter>
+			<parameter name="sharpness" code="shar" description="Video sharpness from -50 to 50" type="number" optional="yes"><cocoa key="sharpness"/></parameter>
+			<parameter name="saturation" code="satu" description="Video saturation from -50 to 50 (sets Cb and Cr together)" type="number" optional="yes"><cocoa key="saturation"/></parameter>
+			<parameter name="cb" code="cbad" description="Video Cb saturation from -50 to 50" type="number" optional="yes"><cocoa key="cb"/></parameter>
+			<parameter name="cr" code="crad" description="Video Cr saturation from -50 to 50" type="number" optional="yes"><cocoa key="cr"/></parameter>
+			<parameter name="video encoding" code="venc" description="Video encoding format for movies" type="videoEncoding" optional="yes"><cocoa key="videoencoding"/></parameter>
+			<parameter name="audio encoding" code="aenc" description="Audio encoding format for movies" type="audioEncoding" optional="yes"><cocoa key="audioencoding"/></parameter>
+			<parameter name="audio format" code="afor" description="Format of the incoming audio" type="audioFormat" optional="yes"><cocoa key="audioformat"/></parameter>
+			<parameter name="audio delay" code="adel" description="Audio delay for movies, in milliseconds" type="number" optional="yes"><cocoa key="audiodelay"/></parameter>
+		</command>
+		<command name="video sources" code="getvidso" description="Returns a list of available video sources">
+			<cocoa class="GetVideoSourcesCommand"/>
+			<result description="The list of available video sources"><type type="text" list="yes"/></result>
+		</command>
+		<command name="audio sources" code="getaudso" description="Returns a list of available audio sources">
+			<cocoa class="GetAudioSourcesCommand"/>
+			<result description="The list of available audio sources"><type type="text" list="yes"/></result>
+		</command>
+		<command name="status" code="Syncstat" description="Returns the current status of the software">
+			<cocoa class="GetStatusCommand"/>
+			<result description="A record that describes the current software status" type="statusRecord"/>
+		</command>
+	</suite>
+</dictionary>
